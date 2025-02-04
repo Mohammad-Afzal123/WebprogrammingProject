@@ -1,0 +1,181 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced Weather Forecast Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+    <div class="weather-container">
+        <div id="date-time"></div>
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="Enter city name">
+            <button id="search-btn">Search</button>
+        </div>
+        
+        <div class="weather-cards">
+            <div class="weather-card location-card">
+                <div class="card-header">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Location Details</h3>
+                </div>
+                <div class="card-content">
+                    <h2 id="city-name">-</h2>
+                    <p id="current-date">-</p>
+                </div>
+            </div>
+
+            <div class="weather-card temperature-card">
+                <div class="card-header">
+                    <i class="fas fa-thermometer-half"></i>
+                    <h3>Current Temperature</h3>
+                </div>
+                <div class="card-content temperature-section">
+                    <h1 id="temperature">-°C</h1>
+                    <div class="weather-icon" id="weather-icon"></div>
+                    <p id="weather-description">-</p>
+                    <p id="feels-like">Feels Like: -°C</p>
+                </div>
+            </div>
+
+            <div class="weather-card details-card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Weather Details</h3>
+                </div>
+                <div class="card-content additional-details">
+                    <div class="detail">
+                        <i class="fas fa-tint"></i>
+                        <div>
+                            <p>Humidity</p>
+                            <p id="humidity">-</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-wind"></i>
+                        <div>
+                            <p>Wind Speed</p>
+                            <p id="wind-speed">- km/h</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-compass"></i>
+                        <div>
+                            <p>Wind Direction</p>
+                            <p id="wind-direction">-</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        <div>
+                            <p>Pressure</p>
+                            <p id="pressure">- hPa</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card environmental-card">
+                <div class="card-header">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Environmental Conditions</h3>
+                </div>
+                <div class="card-content environmental-details">
+                    <div class="detail">
+                        <i class="fas fa-radiation"></i>
+                        <div>
+                            <p>AQI</p>
+                            <p id="aqi">-</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-sun"></i>
+                        <div>
+                            <p>UV Index</p>
+                            <p id="uv-index">-</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-eye"></i>
+                        <div>
+                            <p>Visibility</p>
+                            <p id="visibility">- km</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-moon"></i>
+                        <div>
+                            <p>Moon Phase</p>
+                            <p id="moon-phase">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weather-card sun-card">
+                <div class="card-header">
+                    <i class="fas fa-sun"></i>
+                    <h3>Sun Times</h3>
+                </div>
+                <div class="card-content sun-details">
+                    <div class="detail">
+                        <i class="fas fa-sunrise"></i>
+                        <div>
+                            <p>Sunrise</p>
+                            <p id="sunrise-time">-</p>
+                        </div>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-sunset"></i>
+                        <div>
+                            <p>Sunset</p>
+                            <p id="sunset-time">-</p>
+                        </div>
+                    </div>
+                    <div class="sun-times">
+                        <div class="sun"></div>
+                    </div>
+                    <div id="date-time"></div>
+                                        
+                </div>
+            </div>
+
+            <div class="weather-card forecast-card">
+                <div class="card-header">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>5-Day Forecast</h3>
+                </div>
+                <div id="extended-forecast-container" class="card-content forecast-container"></div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js" type="module"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+        // Get and display current date and time
+        const dateTimeElement = document.getElementById('date-time');
+        setInterval(() => {  // Update every second
+            const now = new Date();
+            dateTimeElement.textContent = now.toLocaleString();
+        }, 1000);
+
+
+
+        // Calculate sun position percentage (same as before)
+        let sunPositionPercentage = (currentHour / 24) * 100;
+        sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
+
+        // Set the CSS variable
+        document.documentElement.style.setProperty('--sun-position', sunPositionPercentage + '%');
+
+        // Disable sun animation
+        const sunElement = document.querySelector('.sun');
+        sunElement.style.animation = 'none';
+
+
+    });
+    </script>
+</body>
+</html>
