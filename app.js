@@ -62,6 +62,7 @@ class WeatherApp {
       }, index * 100);
     });
   }
+  const apiKey = "adf472717719f12c92c2244d06cb2618";
 
   async fetchWeatherData() {
     const city = this.cityInput.value;
@@ -279,12 +280,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Get the current hour (0-23)
   const currentHour = new Date().getHours();
 
-  // Calculate sun position percentage (same as before)
-  let sunPositionPercentage = (currentHour / 24) * 100;
-  sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
+ if (isNaN(currentHour)) {
+    console.error("Error: Unable to retrieve current hour.");
+  } else {
+    // Calculate sun position percentage safely
+    let sunPositionPercentage = (currentHour / 24) * 100;
+    sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
 
-  // Set the CSS variable
-  document.documentElement.style.setProperty('--sun-position', sunPositionPercentage + '%');
+    // Set the CSS variable
+    document.documentElement.style.setProperty('--sun-position', `${sunPositionPercentage}%`);
+  }
 
   // Disable sun animation
   const sunElement = document.querySelector('.sun');
