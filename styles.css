@@ -8,16 +8,16 @@
 }
 
 body {
-    margin: 0; /* Remove default margin */
-    background: linear-gradient(135deg, #283c8e, #45a247); /* Keep background */
-    min-height: 100vh;  /* Ensure full viewport height */
-    display: block;  /* Key change: Use block layout for top-to-bottom */
-    padding: 0; /* adjust as needed */
+    margin: 0;
+    background: linear-gradient(135deg, #283c8e, #45a247);
+    min-height: 100vh;
+    display: block;
+    padding: 0;
 }
 
 header {
     text-align: center;
-    padding: 10px 0; /* Adjust as needed */
+    padding: 10px 0;
 }
 
 .weather-container {
@@ -27,7 +27,7 @@ header {
     padding: 20px;
     width: 90%;
     max-width: 1400px;
-    margin: 20px auto; /* Center horizontally */
+    margin: 20px auto;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
     transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -46,14 +46,79 @@ header {
     padding: 30px;
     color: white;
     transition: all 0.4s ease;
-    animation: cardAppear 0.5s ease-in-out forwards; /* Card appearance animation */
-    opacity: 0; /* Initially hidden for animation */
-    transform: translateY(20px); /* Initial offset for animation */
+    animation: cardAppear 0.5s ease-in-out forwards;
+    opacity: 1; /* Ensure card remains visible */
+    transform: translateY(20px);
+    border: 6px solid transparent;
+    border-radius: 20px;
+    border-image-slice: 1;
 }
 
+.weather-card.sunny {
+    border-image: linear-gradient(45deg, #ffeb3b, #ff9800);
+}
+
+.weather-card.rainy {
+    border-image: linear-gradient(45deg, #2196f3, #90caf9);
+}
+
+.weather-card.cloudy {
+    border-image: linear-gradient(45deg, #b0bec5, #78909c);
+}
+
+.weather-card.stormy {
+    border-image: linear-gradient(45deg, #263238, #546e7a);
+}
+
+.weather-card::after,.weather-card::before{
+    content: '';
+    position:absolute;
+    height: 100%;
+    width: 100%;
+    background-image: conic-gradient(from var(--angle),blue,);
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+    padding: 3px;
+    border-radius: 10px;
+    animation: 3s spin linear infinite;
+}
+
+.card::before{
+    filter: blur(1.5rem);
+    opacity: 0.5;
+}
+
+@keyframes spin{
+    from{
+        --angle: 0deg;
+    }
+    to{
+        --angle: 360deg;
+    }
+}
+
+/* Hover effect */
 .weather-card:hover {
     box-shadow: 0 30px 45px rgba(0, 0, 0, 0.3);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05); /* Slight scale-up */
+    background: linear-gradient(45deg, #22ff73, #00d0ff, #36f43c, #3321f3);
+    background-size: 400% 400%;
+    animation: gradientAnimation 3s ease infinite;
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .card-header {
@@ -62,12 +127,14 @@ header {
     margin-bottom: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     padding-bottom: 15px;
-    animation: slideIn 0.6s ease forwards; /* Slide-in animation */
+    animation: slideIn 0.6s ease forwards;
     color: #e0f2f7;
 }
+
 .weather-card.forecast-card {
-    grid-column: span 3; /* Spans two grid columns */
+    grid-column: span 3;
 }
+
 .card-header i {
     margin-right: 15px;
     font-size: 30px;
@@ -83,32 +150,46 @@ header {
     width: 100%;
     padding: 12px;
     margin-top: 10px;
-    background-color: #2196F3; /* Vibrant blue */
+    background-color: #2196F3;
     color: white;
     border: none;
-    border-radius: 25px; /* More rounded corners */
+    border-radius: 25px;
     cursor: pointer;
     font-size: 18px;
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Add transform transition */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Add subtle shadow */
-    text-transform: uppercase; /* Make text uppercase */
-    font-weight: 500; /* Slightly bolder font weight */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
 .search-box button:hover {
-    background-color: #1976D4; /* Darker blue on hover */
-    transform: scale(1.05); /* Slight scale up on hover */
+    background-color: #1976D4;
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #ff5722, #ff9800, #f44336, #2196f3);
+    background-size: 200% 200%;
+    animation: gradientButtonAnimation 3s ease infinite;
+}
+
+@keyframes gradientButtonAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .search-box button:focus {
     outline: none;
-    box-shadow: 0 0 5px rgba(33, 150, 243, 0.5); /* Blue shadow on focus */
-}
-
-.search-box input:focus + button { /* Style button when input is focused */
     box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
 }
 
+.search-box input:focus + button {
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
 
 .search-box input {
     width: 100%;
@@ -121,16 +202,12 @@ header {
     transition: all 0.4s ease;
 }
 
-
-
 .temperature-section h1 {
     text-align: center;
     font-size: 3.5rem;
     margin-bottom: 20px;
-    animation: pulseTemp 2s infinite alternate; /* Temperature pulse animation */
+    animation: pulseTemp 2s infinite alternate;
 }
-
-
 
 @media (max-width: 900px) {
     .weather-cards {
@@ -138,9 +215,7 @@ header {
     }
 }
 
-
-
-.loading { /* Loading shimmer effect */
+.loading {
     background: linear-gradient(to right, #e0e0e0 0%, #f0f0f0 50%, #e0e0e0 100%);
     background-size: 1000px 100%;
     animation: shimmer 1.5s infinite linear;
@@ -165,73 +240,53 @@ header {
         background-position: 1000px 0;
     }
 }
-/* ... (other CSS styles) ... */
+
+@keyframes cardAppear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* CSS Variable for Sun Position */
 :root {
-    --sun-position: 50%; /* Default position: noon */
+    --sun-position: 50%;
 }
 
-.sun-times { /* Container for the sun animation */
+.sun-times {
     width: 200px;
     height: 200px;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.5);
-    position: relative; /* To position the sun element */
-    overflow: hidden; /* Hide any overflow of the sun */
-    margin: 20px auto; /* Center the sun animation */
+    position: relative;
+    overflow: hidden;
+    margin: 20px auto;
     aspect-ratio: 1/1;
 }
 
-.sun { /* The sun element */
+.sun {
     width: 40px;
     height: 40px;
-    background-color: #FFD700; /* Gold color */
+    background-color: #FFD700;
     border-radius: 50%;
     position: absolute;
-    left: calc(var(--sun-position) * 1% - 20px); /* Multiply by 1% for percentage calculation */
+    left: calc(var(--sun-position) * 1% - 20px);
     top: calc((100% - 30px)/2); 
-    transform: translateY(-50%); /* Center vertically */
+    transform: translateY(-50%);
 }
 
-
-@keyframes riseAndSet {  /* Example animation for continuous movement */
+@keyframes riseAndSet {
     0% { transform: translateY(-50%) translateX(0); }
-    50% { transform: translateY(-150%) translateX(0); /* "Hidden" above the circle */}
-    100% { transform: translateY(-50%) translateX(0); } /* Simulate full cycle if JS fails*/
+    50% { transform: translateY(-150%) translateX(0); }
+    100% { transform: translateY(-50%) translateX(0); }
 }
+
 #date-time {
     text-align: center;
     color: white;
     margin-top: 20px;
     font-size: 1.2em;
-    animation: fadeIn 1s ease-in-out; /* Fade-in animation for date/time */
-}
-
-
-
-/* Keyframe animations */
-@keyframes slideIn { /* For card headers */
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes shimmer { /* Loading shimmer */
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
-}
-
-@keyframes cardAppear { /* Card appearance */
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    animation: fadeIn 1s ease-in-out;
 }
 
 
