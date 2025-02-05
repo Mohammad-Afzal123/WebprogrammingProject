@@ -62,7 +62,6 @@ class WeatherApp {
       }, index * 100);
     });
   }
-  const apiKey = "adf472717719f12c92c2244d06cb2618";
 
   async fetchWeatherData() {
     const city = this.cityInput.value;
