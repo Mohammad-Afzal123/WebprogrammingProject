@@ -1,4 +1,14 @@
-const apiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
+fetch("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/chennai?unitGroup=us&key=BRS46DDHQV9NRWCLQMNPHJPAV&contentType=json", {
+  "method": "GET",
+  "headers": {
+  }
+  })
+.then(response => {
+  console.log(response);
+})
+.catch(err => {
+  console.error(err);
+});
 
 class WeatherApp {
   constructor() {

@@ -6,7 +6,53 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    
+    <header>  <!-- Added a header for the logo -->
+        <svg width="200" height="100" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g>
+                <g id="sun-group">  // Group sun and rays for rotation 
+                    <circle cx="80" cy="40" r="30" fill="#FFD700" />
+                    <g id="sun-rays">
+                    <polygon points="115 25, 130 40, 115 55" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="65 5, 80 -10, 95 5" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="65 75, 80 90, 95 75" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="45 25, 30 40, 45 55" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="115 55, 115 75, 95 75" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="65 5, 45 5, 45 25" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="65 75, 40 75, 45 55" fill="#FFD700" opacity="0.7"/>
+                    <polygon points="95 5, 120 5, 115 25" fill="#FFD700" opacity="0.7"/>
+                    </g>
+                    <animateTransform attributeName="transform" type="rotate" values="0 80 40; 360 80 40" dur="10s" repeatCount="indefinite"/></g>
+          
+                    <path id="cloud-left" 
+      d="M 10 60 
+         C 10 50, 30 50, 40 60
+         A 20 15 0 0 0 65 75
+         H 75 
+         A 20 15 0 0 0 95 60
+         C 95 50, 65 50, 75 40
+         A 20 15 0 0,0 50 25
+         A 20 15, 0, 0, 0, 20, 40
+         C 5 45, 10 55, 10 60 Z" 
+      fill="#e0f2f7" opacity="0.8">
+    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -3; 0 0" dur="4s" repeatCount="indefinite" />
+</path>
+
+                    
+                    
+              <path id="cloud-right" d="M110 55A20 15 0 0 0 90 70A25 20 0 0 0 120 90H140A20 15 0 0 0 160 75A20 15 0 0 0 140 60H130A10 8 0 0 1 120 68A10 8 0 0 1 110 60A25 20 0 0 0 110 55Z" fill="#e0f2f7" opacity="0.8">
+                  <animateTransform attributeName="transform" type="translate" values="0 0; 0 -3; 0 0" dur="4s" repeatCount="indefinite" begin="0.5s"/>
+              </path>
+          
+              <text x="70" y="38" font-size="20" text-anchor="middle" dominant-baseline="middle" fill="#349030" font-family="sans-serif" font-weight="bold" letter-spacing="2">
+              Clima<tspan x="80" dy="20">View</tspan>
+                  <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite" />
+              </text>
+            </g>
+          </svg>
+          
+          
+          
+    </header>
     <div class="weather-container">
         <div id="date-time"></div>
         <div class="search-box">
