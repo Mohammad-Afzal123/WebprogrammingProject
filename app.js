@@ -1,14 +1,8 @@
-fetch("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/chennai?unitGroup=us&key=BRS46DDHQV9NRWCLQMNPHJPAV&contentType=json", {
-  "method": "GET",
-  "headers": {
-  }
-  })
-.then(response => {
-  console.log(response);
-})
-.catch(err => {
-  console.error(err);
-});
+// app.js
+
+
+const apiKey = "adf472717719f12c92c2244d06cb2618"; // Your OpenWeatherMap API Key
+
 
 class WeatherApp {
   constructor() {
@@ -33,7 +27,7 @@ class WeatherApp {
     this.sunriseTime = document.getElementById('sunrise-time');
     this.sunsetTime = document.getElementById('sunset-time');
     this.forecastContainer = document.getElementById('extended-forecast-container');
-    
+
     // New elements
     this.aqi = document.getElementById('aqi');
     this.uvIndex = document.getElementById('uv-index');
@@ -54,7 +48,7 @@ class WeatherApp {
     this.weatherCards.forEach((card, index) => {
       card.style.opacity = '0';
       card.style.transform = 'translateY(20px)';
-      
+
       setTimeout(() => {
         card.style.transition = 'all 0.5s ease';
         card.style.opacity = '1';
@@ -65,7 +59,7 @@ class WeatherApp {
 
   async fetchWeatherData() {
     const city = this.cityInput.value;
-    
+
     // Add loading state
     this.weatherCards.forEach(card => card.classList.add('loading'));
 
@@ -87,7 +81,7 @@ class WeatherApp {
         `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
       );
       const geoData = await geoResponse.json();
-      
+
       // One Call API for more detailed data
       const oneCallResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/onecall?lat=${geoData[0].lat}&lon=${geoData[0].lon}&exclude=minutely,hourly,alerts&appid=${apiKey}&units=metric`
@@ -102,7 +96,7 @@ class WeatherApp {
     } catch (error) {
       console.error('Error fetching weather data:', error);
       alert('City not found. Please try again.');
-      
+
       // Remove loading state
       this.weatherCards.forEach(card => card.classList.remove('loading'));
     }
@@ -111,16 +105,16 @@ class WeatherApp {
   animateWeatherUpdate() {
     // Add subtle animations to update
     const elementsToAnimate = [
-      this.cityName, 
-      this.temperature, 
-      this.weatherIcon, 
+      this.cityName,
+      this.temperature,
+      this.weatherIcon,
       this.forecastContainer
     ];
 
     elementsToAnimate.forEach(el => {
       el.style.transition = 'all 0.5s ease';
       el.style.transform = 'scale(1.1)';
-      
+
       setTimeout(() => {
         el.style.transform = 'scale(1)';
       }, 500);
@@ -144,7 +138,7 @@ class WeatherApp {
     this.windSpeed.textContent = `${data.wind.speed} km/h`;
     this.windDirection.textContent = this.getWindDirection(data.wind.deg);
     this.pressure.textContent = `${data.main.pressure} hPa`;
-    
+
     // Sunrise and sunset times
     this.sunriseTime.textContent = this.formatTime(data.sys.sunrise * 1000);
     this.sunsetTime.textContent = this.formatTime(data.sys.sunset * 1000);
@@ -180,8 +174,8 @@ class WeatherApp {
   }
 
   getWindDirection(degrees) {
-    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 
-                        'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+      'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
     const index = Math.round(degrees / 22.5) % 16;
     return directions[index];
   }
@@ -189,13 +183,13 @@ class WeatherApp {
   updateExtendedForecast(data) {
     this.forecastContainer.innerHTML = '';
     const dailyData = this.groupForecastByDay(data.list);
-    
+
     dailyData.slice(0, 5).forEach(day => {
       const forecastDay = document.createElement('div');
       forecastDay.classList.add('forecast-day');
-      
+
       const dayName = this.formatDayName(new Date(day.dt * 1000));
-      
+
       forecastDay.innerHTML = `
         <div class="day-name">${dayName}</div>
         <div>${this.getWeatherIcon(day.weather[0].main)}</div>
@@ -205,7 +199,7 @@ class WeatherApp {
         </div>
         <p>${day.weather[0].description}</p>
       `;
-      
+
       this.forecastContainer.appendChild(forecastDay);
     });
   }
@@ -271,15 +265,13 @@ class WeatherApp {
 
 // Initialize the app when the DOM is fully loaded
 
-// ... (Other code from WeatherApp class)
-
 document.addEventListener('DOMContentLoaded', () => {
   new WeatherApp();
 
   // Get the current hour (0-23)
   const currentHour = new Date().getHours();
 
- if (isNaN(currentHour)) {
+  if (isNaN(currentHour)) {
     console.error("Error: Unable to retrieve current hour.");
   } else {
     // Calculate sun position percentage safely
@@ -294,12 +286,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const sunElement = document.querySelector('.sun');
   sunElement.style.animation = 'none';
 
-    // Update the time and date
-    const dateTimeElement = document.getElementById('date-time');
-    setInterval(() => {
+  // Update the time and date
+  const dateTimeElement = document.getElementById('date-time');
+  setInterval(() => {
     const now = new Date();
     dateTimeElement.textContent = now.toLocaleString();
-    }, 1000); // Update every second
+  }, 1000); // Update every second
 });
-
-
