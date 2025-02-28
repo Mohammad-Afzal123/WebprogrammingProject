@@ -1,9 +1,71 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Advanced Weather Forecast Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link href=
+"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" 
+          rel="stylesheet">
+  
+    <!-- Font Awesome -->
+    <link href=
+"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" 
+          rel="stylesheet">
+  
+    <!-- Bootstrap Bundle with Popper -->
+    <script src=
+"https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <style>
+        #india-map-container {
+            width: 100%;
+            margin-top: 20px; /* Add some spacing above the map */
+        }
+        #india-map {
+            width: 100%;
+            height: 500px;
+        }
+        .map-controls {
+            padding: 10px;
+        }
+    </style>
+    <style>
+        body {
+            color: white;
+        }
+
+        .footer {
+            background-color: #198754;
+        }
+
+        .footer-content h1 {
+            color: #fff;
+            font-weight: 400;
+        }
+
+        .footer-content h5,
+        .footer-content p,
+        .footer-links a {
+            color: #fff;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer hr {
+            background-color: #fff;
+        }
+        .tose{
+            font-weight: 800;
+            font-size: 50px;
+        }
+    </style>
 </head>
 <body>
     <header>  <!-- Added a header for the logo -->
@@ -49,9 +111,6 @@
               </text>
             </g>
           </svg>
-          
-          
-          
     </header>
     <div class="weather-container">
         <div id="date-time"></div>
@@ -196,8 +255,97 @@
             </div>
         </div>
     </div>
+    
+    <!-- India Weather Map Container -->
+    <div id="weather-container">
+        <h2>Live Weather Map - India</h2>
+        <div id="india-map"></div>
+        <div class="map-controls">
+            <label>
+                <input type="checkbox" id="weatherLayerToggle" onchange="toggleWeatherLayer()"> Show Weather Layer
+            </label>
+            <label>
+                <input type="checkbox" id="imageOverlayToggle" onchange="toggleImageOverlay()"> Show Image Overlay
+            </label>
+        </div>
+    </div>
+    <footer class="footer p-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <h1 class="tose">ClimaView</h1>
+                </div>
+                <div class="col-md-3">
+                    <h5>About Us</h5>
+                    <p>
+                        The website is designed with a clean and user-friendly interface, ensuring a seamless user experience. Additionally, it integrates AI-powered features, including a chatbot for weather-related queries and an intelligent weather prediction system, enhancing its accuracy and usability. This project aims to offer a comprehensive and dynamic weather forecasting experience with modern web technologies.
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li>Email: afzal.khan.m.mak@gmail.com</li>
+                        <li>Phone: +91 7619499808</li>
+                        <li>Address: Chennai, India</li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Follow Us</h5>
+                    <ul class="list-inline footer-links">
+                        <li class="list-inline-item">
+                          <a href="#">
+                                <i class="fab fa-facebook"></i>
+                          </a>
+                          </li>
+                        <li class="list-inline-item">
+                          <a href="#">
+                                <i class="fab fa-twitter"></i>
+                          </a>
+                        </li>
+                        <li class="list-inline-item">
+                          <a href="#">
+                                <i class="fab fa-instagram"></i>
+                          </a>
+                        </li>
+                        <li class="list-inline-item">
+                          <a href="#">
+                                <i class="fab fa-linkedin"></i>
+                          </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2025. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <ul class="list-inline footer-links">
+                        <li class="list-inline-item">
+                            <a href="#" class="text-white">
+                                Privacy Policy
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="text-white">
+                                Terms of Service
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="text-white">
+                                Sitemap
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
     <script src="app.js" type="module"></script>
-        <script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
 
         // Get and display current date and time
@@ -222,6 +370,76 @@
 
 
     });
+    </script>
+    <script>
+        const API_KEY = "adf472717719f12c92c2244d06cb2618";  // Replace with your API Key
+        let map;
+        let weatherLayer;
+        let imageOverlay;
+
+        function initMap() {
+            map = L.map("india-map").setView([20.5937, 78.9629], 5);  // Centered on India
+
+            // Add Base Map (OpenStreetMap)
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        function toggleWeatherLayer() {
+            const isChecked = document.getElementById("weatherLayerToggle").checked;
+            
+            if (isChecked) {
+                weatherLayer = L.tileLayer(
+                    `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
+                        opacity: 0.7,
+                        attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>'
+                    }
+                ).addTo(map);
+            } else {
+                if (weatherLayer) map.removeLayer(weatherLayer);
+            }
+        }
+
+        function toggleImageOverlay() {
+            const isChecked = document.getElementById("imageOverlayToggle").checked;
+            
+            if (isChecked) {
+                const imageUrl = "https://mausam.imd.gov.in/Satellite/3Dasiasec_ir1.jpg"; // Example: IMD satellite image
+                const imageBounds = [[5, 65], [35, 100]]; // Covers most of India
+
+                imageOverlay = L.imageOverlay(imageUrl, imageBounds, { opacity: 0.6 }).addTo(map);
+            } else {
+                if (imageOverlay) map.removeLayer(imageOverlay);
+            }
+        }
+
+        window.onload = function() {
+            initMap();
+        };
+    </script>
+    <script src="https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", function() {
+        window.AgentInitializer.init({
+          rootId: "JotformAgent-01954b41a94f742d8e9f41741dc499fd6ada",
+          formID: "01954b41a94f742d8e9f41741dc499fd6ada",
+          queryParams: ["skipWelcome=1", "maximizable=1"],
+          domain: "https:\/\/www.jotform.com",
+          isInitialOpen: false,
+          isDraggable: false,
+          background: "linear-gradient(180deg, #C8CEED 0%, #C8CEED 100%)",
+          buttonBackgroundColor: "#0a1551",
+          buttonIconColor: "#fff",
+          variant: false,
+          customizations: {
+            greeting: "Yes",
+            greetingMessage: "Hi! How can I assist you?",
+            pulse: "Yes",
+            position: "right"
+          }
+        });
+      });
     </script>
 </body>
 </html>
