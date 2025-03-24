@@ -278,10 +278,18 @@ class WeatherApp {
     const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
     dayNames.unshift("Today")
 
-    this.createGraph(graphData, dayNames);
+    // Extract all temp_max and temp_min values for the graph
+    const allTemps = [];
+    allTemps.push(currentTemp); // Add current temp
+    dailyData.forEach(day => {
+        allTemps.push(day.main.temp_max);
+        allTemps.push(day.main.temp_min);
+    });
+
+    this.createGraph(graphData, dayNames, allTemps);
   }
 
-  createGraph(data, labels) {
+  createGraph(data, labels, allTemps) {
     this.forecastGraph.innerHTML = ''; // Clear previous graph
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -289,8 +297,9 @@ class WeatherApp {
     svg.setAttribute('height', '200');
     svg.setAttribute('viewBox', '0 0 500 200'); // Adjust viewBox as needed
 
-    const maxTemp = Math.max(...data);
-    const minTemp = Math.min(...data);
+    // Use allTemps to find the min and max
+    const maxTemp = Math.max(...allTemps);
+    const minTemp = Math.min(...allTemps);
     const tempRange = maxTemp - minTemp;
     const padding = 20;
     const graphWidth = 500 - 2 * padding;
@@ -339,6 +348,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Get the current hour (0-23)
   const currentHour = new Date().getHours();
+
+
+
 
   if (isNaN(currentHour)) {
     console.error("Error: Unable to retrieve current hour.");
