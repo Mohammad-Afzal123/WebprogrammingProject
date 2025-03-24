@@ -1,7 +1,7 @@
 // app.js
 
 
-const apiKey = "adf472717719f12c92c2244d06cb2618"; // Your OpenWeatherMap API Key
+const apiKey = "9bd08bc223eb771a9f4eafba0b4c9eb3"; // Your OpenWeatherMap API Key
 
 
 class WeatherApp {
