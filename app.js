@@ -1,8 +1,6 @@
 // app.js
 
-
-const apiKey = "9bd08bc223eb771a9f4eafba0b4c9eb3"; // Your OpenWeatherMap API Key
-
+const apiKey = "adf472717719f12c92c2244d06cb2618"; // Your OpenWeatherMap API Key
 
 class WeatherApp {
   constructor() {
@@ -27,6 +25,7 @@ class WeatherApp {
     this.sunriseTime = document.getElementById('sunrise-time');
     this.sunsetTime = document.getElementById('sunset-time');
     this.forecastContainer = document.getElementById('extended-forecast-container');
+    this.forecastGraph = document.getElementById('forecast-graph'); // New: Forecast graph container
 
     // New elements
     this.aqi = document.getElementById('aqi');
@@ -108,7 +107,8 @@ class WeatherApp {
       this.cityName,
       this.temperature,
       this.weatherIcon,
-      this.forecastContainer
+      this.forecastContainer,
+      this.forecastGraph // Include the graph container
     ];
 
     elementsToAnimate.forEach(el => {
@@ -125,6 +125,7 @@ class WeatherApp {
     this.updateCurrentWeather(currentWeather, oneCallData);
     this.updateExtendedForecast(forecastData);
     this.updateBackground(currentWeather.weather[0].main);
+    this.updateForecastGraph(currentWeather, forecastData); // New: Update the graph
   }
 
   updateCurrentWeather(data, oneCallData) {
@@ -260,6 +261,74 @@ class WeatherApp {
       'Mist': '<span class="animated-icon">🌫️</span>'
     };
     return icons[weatherCondition] || '<span class="animated-icon">❓</span>';
+  }
+
+  updateForecastGraph(currentWeather, forecastData) {
+    const dailyData = this.groupForecastByDay(forecastData.list).slice(0, 5);
+    const currentTemp = currentWeather.main.temp;
+
+    const graphData = [
+      Math.round(currentTemp), // Day 1: Actual temperature
+      Math.round((dailyData[0].main.temp_max + currentTemp) / 2), // Day 2: Avg of max and current
+      Math.round((currentTemp + dailyData[0].main.temp_min) / 2), // Day 3: Avg of current and min
+      Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2), // Day 4: Avg of min and max
+      Math.round(dailyData[0].main.temp) // Day 5: Actual temperature
+    ];
+
+    const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
+    dayNames.unshift("Today")
+
+    this.createGraph(graphData, dayNames);
+  }
+
+  createGraph(data, labels) {
+    this.forecastGraph.innerHTML = ''; // Clear previous graph
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '200');
+    svg.setAttribute('viewBox', '0 0 500 200'); // Adjust viewBox as needed
+
+    const maxTemp = Math.max(...data);
+    const minTemp = Math.min(...data);
+    const tempRange = maxTemp - minTemp;
+    const padding = 20;
+    const graphWidth = 500 - 2 * padding;
+    const graphHeight = 200 - 2 * padding;
+    const barWidth = graphWidth / data.length;
+
+    for (let i = 0; i < data.length; i++) {
+      const barHeight = (data[i] - minTemp) / tempRange * graphHeight;
+      const x = padding + i * barWidth;
+      const y = graphHeight + padding - barHeight;
+
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', y);
+      rect.setAttribute('width', barWidth - 10);
+      rect.setAttribute('height', barHeight);
+      rect.setAttribute('fill', 'lightblue');
+      rect.setAttribute('rx', '5');
+      rect.setAttribute('ry', '5');
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', x + barWidth / 2 - 5);
+      text.setAttribute('y', y - 5);
+      text.setAttribute('fill', 'white');
+      text.textContent = data[i] + '°C';
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', x + barWidth / 2 - 10);
+      label.setAttribute('y', graphHeight + padding + 20);
+      label.setAttribute('fill', 'white');
+      label.textContent = labels[i];
+
+      svg.appendChild(rect);
+      svg.appendChild(text);
+      svg.appendChild(label);
+    }
+
+    this.forecastGraph.appendChild(svg);
   }
 }
 
