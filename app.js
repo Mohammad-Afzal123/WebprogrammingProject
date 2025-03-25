@@ -1,3 +1,4 @@
+
 const apiKey = "adf472717719f12c92c2244d06cb2618";
 
 class WeatherApp {
@@ -5,6 +6,7 @@ class WeatherApp {
     this.initializeElements();
     this.addEventListeners();
     this.animateInitialLoad();
+    this.setupExport();
   }
 
   initializeElements() {
@@ -29,6 +31,7 @@ class WeatherApp {
     this.visibility = document.getElementById('visibility');
     this.moonPhase = document.getElementById('moon-phase');
     this.weatherCards = document.querySelectorAll('.weather-card');
+    this.exportBtn = document.getElementById('export-btn');
   }
 
   addEventListeners() {
@@ -36,6 +39,59 @@ class WeatherApp {
     this.cityInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.fetchWeatherData();
     });
+  }
+  setupExport() {
+    this.exportBtn.addEventListener('click', () => this.exportToWord());
+  }
+  exportToWord() {
+    const weatherData = this.getWeatherDataForExport();
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+      "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+      "xmlns='http://www.w3.org/TR/REC-html40'>" +
+      "<head><meta charset='utf-8'><title>Exported Weather Data</title></head><body>";
+    const footer = "</body></html>";
+    const sourceHTML = header + weatherData + footer;
+    const sourceBlob = new Blob(['\ufeff', sourceHTML], {
+      type: 'application/msword'
+    });
+    saveAs(sourceBlob, 'weather_data.doc');
+  }
+  getWeatherDataForExport() {
+    const cityName = this.cityName.textContent;
+    const currentDate = this.currentDate.textContent;
+    const temperature = this.temperature.textContent;
+    const feelsLike = this.feelsLike.textContent;
+    const weatherDescription = this.weatherDescription.textContent;
+    const humidity = this.humidity.textContent;
+    const windSpeed = this.windSpeed.textContent;
+    const windDirection = this.windDirection.textContent;
+    const pressure = this.pressure.textContent;
+    const sunriseTime = this.sunriseTime.textContent;
+    const sunsetTime = this.sunsetTime.textContent;
+    const aqi = this.aqi.textContent;
+    const uvIndex = this.uvIndex.textContent;
+    const visibility = this.visibility.textContent;
+    const moonPhase = this.moonPhase.textContent;
+    const forecast = this.forecastContainer.innerHTML;
+    const weatherDataHTML = `
+    <div>City: ${cityName}</div>
+    <div>Date: ${currentDate}</div>
+    <div>Temperature: ${temperature}</div>
+    <div>Feels Like: ${feelsLike}</div>
+    <div>Description: ${weatherDescription}</div>
+    <div>Humidity: ${humidity}</div>
+    <div>Wind Speed: ${windSpeed}</div>
+    <div>Wind Direction: ${windDirection}</div>
+    <div>Pressure: ${pressure}</div>
+    <div>Sunrise: ${sunriseTime}</div>
+    <div>Sunset: ${sunsetTime}</div>
+    <div>AQI: ${aqi}</div>
+    <div>UV Index: ${uvIndex}</div>
+    <div>Visibility: ${visibility}</div>
+    <div>Moon Phase: ${moonPhase}</div>
+    <div><h3>Forecast</h3>${forecast}</div>
+    `;
+    return weatherDataHTML;
   }
 
   animateInitialLoad() {
@@ -301,6 +357,7 @@ class WeatherApp {
       rect.setAttribute('height', barHeight);
       rect.setAttribute('fill', 'lightblue');
       rect.setAttribute('rx', '5');
+      
       rect.setAttribute('ry', '5');
 
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
