@@ -420,3 +420,31 @@ document.addEventListener('DOMContentLoaded', () => {
     dateTimeElement.textContent = now.toLocaleString();
   }, 1000);
 });
+function generateRandomLineGraph() {
+    const svg = document.getElementById("line-graph-svg");
+    svg.setAttribute("width", "500");
+    svg.setAttribute("height", "300");
+    
+    const width = 500;
+    const height = 300;
+    const numPoints = 10;
+    let points = [];
+
+    for (let i = 0; i < numPoints; i++) {
+        let x = (i / (numPoints - 1)) * width;
+        let y = Math.random() * height;
+        points.push(`${x},${y}`);
+    }
+
+    let polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    polyline.setAttribute("points", points.join(" "));
+    polyline.setAttribute("fill", "none");
+    polyline.setAttribute("stroke", "blue");
+    polyline.setAttribute("stroke-width", "2");
+
+    svg.innerHTML = ""; // Clear previous graph
+    svg.appendChild(polyline);
+}
+
+generateRandomLineGraph();
+
