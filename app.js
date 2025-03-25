@@ -57,29 +57,60 @@ class WeatherApp {
     async fetchWeatherData() {
         const city = this.cityInput.value;
         if (!city) return;
-        
+
         this.weatherCards.forEach(card => card.classList.add('loading'));
 
         try {
             const currentWeatherResponse = await fetch(
                 `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
             );
-            if (!currentWeatherResponse.ok) throw new Error('City not found');
+            if (!currentWeatherResponse.ok) {
+                if (currentWeatherResponse.status === 404) {
+                    throw new Error('City not found');
+                } else {
+                    throw new Error('Failed to fetch weather data');
+                }
+            }
             const currentWeather = await currentWeatherResponse.json();
 
             const forecastResponse = await fetch(
                 `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
             );
+            if (!forecastResponse.ok) {
+                if (forecastResponse.status === 404) {
+                    throw new Error('City not found');
+                } else {
+                    throw new Error('Failed to fetch weather data');
+                }
+            }
             const forecastData = await forecastResponse.json();
 
             const geoResponse = await fetch(
                 `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
             );
+            if (!geoResponse.ok) {
+                if (geoResponse.status === 404) {
+                    throw new Error('City not found');
+                } else {
+                    throw new Error('Failed to fetch weather data');
+                }
+            }
             const geoData = await geoResponse.json();
+
+            if (geoData.length === 0) {
+                throw new Error("City not found");
+            }
 
             const oneCallResponse = await fetch(
                 `https://api.openweathermap.org/data/2.5/onecall?lat=${geoData[0].lat}&lon=${geoData[0].lon}&exclude=minutely,hourly,alerts&appid=${apiKey}&units=metric`
             );
+            if (!oneCallResponse.ok) {
+                if (oneCallResponse.status === 404) {
+                    throw new Error('City not found');
+                } else {
+                    throw new Error('Failed to fetch weather data');
+                }
+            }
             const oneCallData = await oneCallResponse.json();
 
             this.weatherCards.forEach(card => card.classList.remove('loading'));
@@ -88,7 +119,9 @@ class WeatherApp {
         } catch (error) {
             console.error('Error fetching weather data:', error);
             this.weatherCards.forEach(card => card.classList.remove('loading'));
-            alert(error.message === 'City not found' ? "City not found. Please try again." : "Failed to fetch weather data.");
+            if (error.message === 'City not found' || error.message === 'Failed to fetch weather data') {
+                alert(error.message === 'City not found' ? "City not found. Please try again." : "Failed to fetch weather data.");
+            }
         }
     }
 
@@ -102,13 +135,13 @@ class WeatherApp {
             const dataStr = JSON.stringify(this.currentWeatherData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = `${this.currentWeatherData.current.name || 'weather'}-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
-            
+
             setTimeout(() => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
