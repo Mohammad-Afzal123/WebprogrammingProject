@@ -1,6 +1,4 @@
-// app.js
-
-const apiKey = "adf472717719f12c92c2244d06cb2618"; // Your OpenWeatherMap API Key
+const apiKey = "adf472717719f12c92c2244d06cb2618";
 
 class WeatherApp {
   constructor() {
@@ -25,14 +23,11 @@ class WeatherApp {
     this.sunriseTime = document.getElementById('sunrise-time');
     this.sunsetTime = document.getElementById('sunset-time');
     this.forecastContainer = document.getElementById('extended-forecast-container');
-    this.forecastGraph = document.getElementById('forecast-graph'); // New: Forecast graph container
-
-    // New elements
+    this.forecastGraph = document.getElementById('forecast-graph');
     this.aqi = document.getElementById('aqi');
     this.uvIndex = document.getElementById('uv-index');
     this.visibility = document.getElementById('visibility');
     this.moonPhase = document.getElementById('moon-phase');
-
     this.weatherCards = document.querySelectorAll('.weather-card');
   }
 
@@ -58,57 +53,52 @@ class WeatherApp {
 
   async fetchWeatherData() {
     const city = this.cityInput.value;
-
-    // Add loading state
     this.weatherCards.forEach(card => card.classList.add('loading'));
 
     try {
-      // Current Weather
       const currentWeatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
       );
+      if (!currentWeatherResponse.ok) {
+        throw new Error('City not found');
+      }
       const currentWeather = await currentWeatherResponse.json();
 
-      // Forecast
       const forecastResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
       );
       const forecastData = await forecastResponse.json();
 
-      // Geocoding to get lat and lon for additional API calls
       const geoResponse = await fetch(
         `https://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`
       );
       const geoData = await geoResponse.json();
 
-      // One Call API for more detailed data
       const oneCallResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/onecall?lat=${geoData[0].lat}&lon=${geoData[0].lon}&exclude=minutely,hourly,alerts&appid=${apiKey}&units=metric`
       );
       const oneCallData = await oneCallResponse.json();
 
-      // Remove loading state
       this.weatherCards.forEach(card => card.classList.remove('loading'));
 
       this.updateUI(currentWeather, forecastData, oneCallData);
       this.animateWeatherUpdate();
     } catch (error) {
       console.error('Error fetching weather data:', error);
-      alert('City not found. Please try again.');
-
-      // Remove loading state
       this.weatherCards.forEach(card => card.classList.remove('loading'));
+      if (error.message === 'City not found') {
+        console.log("City not found")
+      }
     }
   }
 
   animateWeatherUpdate() {
-    // Add subtle animations to update
     const elementsToAnimate = [
       this.cityName,
       this.temperature,
       this.weatherIcon,
       this.forecastContainer,
-      this.forecastGraph // Include the graph container
+      this.forecastGraph
     ];
 
     elementsToAnimate.forEach(el => {
@@ -125,7 +115,7 @@ class WeatherApp {
     this.updateCurrentWeather(currentWeather, oneCallData);
     this.updateExtendedForecast(forecastData);
     this.updateBackground(currentWeather.weather[0].main);
-    this.updateForecastGraph(currentWeather, forecastData); // New: Update the graph
+    this.updateForecastGraph(currentWeather, forecastData);
   }
 
   updateCurrentWeather(data, oneCallData) {
@@ -139,12 +129,8 @@ class WeatherApp {
     this.windSpeed.textContent = `${data.wind.speed} km/h`;
     this.windDirection.textContent = this.getWindDirection(data.wind.deg);
     this.pressure.textContent = `${data.main.pressure} hPa`;
-
-    // Sunrise and sunset times
     this.sunriseTime.textContent = this.formatTime(data.sys.sunrise * 1000);
     this.sunsetTime.textContent = this.formatTime(data.sys.sunset * 1000);
-
-    // Additional environmental data
     this.aqi.textContent = this.formatAQI(oneCallData.current.air_quality?.us_epa_index || 0);
     this.uvIndex.textContent = oneCallData.current.uvi || '-';
     this.visibility.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
@@ -212,7 +198,6 @@ class WeatherApp {
       if (!dailyData[date]) {
         dailyData[date] = item;
       } else {
-        // Update max and min temperatures
         dailyData[date].main.temp_max = Math.max(dailyData[date].main.temp_max || item.main.temp, item.main.temp_max || item.main.temp);
         dailyData[date].main.temp_min = Math.min(dailyData[date].main.temp_min || item.main.temp, item.main.temp_min || item.main.temp);
       }
@@ -268,19 +253,18 @@ class WeatherApp {
     const currentTemp = currentWeather.main.temp;
 
     const graphData = [
-      Math.round(currentTemp), // Day 1: Actual temperature
-      Math.round((dailyData[0].main.temp_max + currentTemp) / 2), // Day 2: Avg of max and current
-      Math.round((currentTemp + dailyData[0].main.temp_min) / 2), // Day 3: Avg of current and min
-      Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2), // Day 4: Avg of min and max
-      Math.round(dailyData[0].main.temp) // Day 5: Actual temperature
+      Math.round(currentTemp),
+      Math.round((dailyData[0].main.temp_max + currentTemp) / 2),
+      Math.round((currentTemp + dailyData[0].main.temp_min) / 2),
+      Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2),
+      Math.round(dailyData[0].main.temp)
     ];
 
     const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
     dayNames.unshift("Today")
 
-    // Extract all temp_max and temp_min values for the graph
     const allTemps = [];
-    allTemps.push(currentTemp); // Add current temp
+    allTemps.push(currentTemp);
     dailyData.forEach(day => {
         allTemps.push(day.main.temp_max);
         allTemps.push(day.main.temp_min);
@@ -290,14 +274,13 @@ class WeatherApp {
   }
 
   createGraph(data, labels, allTemps) {
-    this.forecastGraph.innerHTML = ''; // Clear previous graph
+    this.forecastGraph.innerHTML = '';
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', '100%');
     svg.setAttribute('height', '200');
-    svg.setAttribute('viewBox', '0 0 500 200'); // Adjust viewBox as needed
+    svg.setAttribute('viewBox', '0 0 500 200');
 
-    // Use allTemps to find the min and max
     const maxTemp = Math.max(...allTemps);
     const minTemp = Math.min(...allTemps);
     const tempRange = maxTemp - minTemp;
@@ -341,36 +324,23 @@ class WeatherApp {
   }
 }
 
-// Initialize the app when the DOM is fully loaded
-
 document.addEventListener('DOMContentLoaded', () => {
   new WeatherApp();
 
-  // Get the current hour (0-23)
   const currentHour = new Date().getHours();
 
-
-
-
-  if (isNaN(currentHour)) {
-    console.error("Error: Unable to retrieve current hour.");
-  } else {
-    // Calculate sun position percentage safely
+  if (!isNaN(currentHour)) {
     let sunPositionPercentage = (currentHour / 24) * 100;
     sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
-
-    // Set the CSS variable
     document.documentElement.style.setProperty('--sun-position', `${sunPositionPercentage}%`);
   }
 
-  // Disable sun animation
   const sunElement = document.querySelector('.sun');
   sunElement.style.animation = 'none';
 
-  // Update the time and date
   const dateTimeElement = document.getElementById('date-time');
   setInterval(() => {
     const now = new Date();
     dateTimeElement.textContent = now.toLocaleString();
-  }, 1000); // Update every second
+  }, 1000);
 });
