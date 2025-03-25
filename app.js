@@ -1,3 +1,4 @@
+
 const apiKey = "adf472717719f12c92c2244d06cb2618";
 
 class WeatherApp {
@@ -5,7 +6,7 @@ class WeatherApp {
     this.initializeElements();
     this.addEventListeners();
     this.animateInitialLoad();
-    this.currentWeatherData = null;
+    this.setupExport();
   }
 
   initializeElements() {
@@ -30,7 +31,9 @@ class WeatherApp {
     this.visibility = document.getElementById('visibility');
     this.moonPhase = document.getElementById('moon-phase');
     this.weatherCards = document.querySelectorAll('.weather-card');
-    this.exportBtn.addEventListener('click',()=> this.exportWeatherData());
+    this.exportBtn = document.getElementById('export-btn');
+    this.lineGraphSvg = document.getElementById('line-graph-svg');
+    this.lineGraphContainer = document.getElementById('line-graph-container');
   }
 
   addEventListeners() {
@@ -38,7 +41,62 @@ class WeatherApp {
     this.cityInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.fetchWeatherData();
     });
-    this.exportBtn.addEventListener('click',()=> this.exportWeatherData());
+  }
+
+  setupExport() {
+    this.exportBtn.addEventListener('click', () => this.exportToWord());
+  }
+
+  exportToWord() {
+    const weatherData = this.getWeatherDataForExport();
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+      "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+      "xmlns='http://www.w3.org/TR/REC-html40'>" +
+      "<head><meta charset='utf-8'><title>Exported Weather Data</title></head><body>";
+    const footer = "</body></html>";
+    const sourceHTML = header + weatherData + footer;
+    const sourceBlob = new Blob(['\ufeff', sourceHTML], {
+      type: 'application/msword'
+    });
+    saveAs(sourceBlob, 'weather_data.doc');
+  }
+
+  getWeatherDataForExport() {
+    const cityName = this.cityName.textContent;
+    const currentDate = this.currentDate.textContent;
+    const temperature = this.temperature.textContent;
+    const feelsLike = this.feelsLike.textContent;
+    const weatherDescription = this.weatherDescription.textContent;
+    const humidity = this.humidity.textContent;
+    const windSpeed = this.windSpeed.textContent;
+    const windDirection = this.windDirection.textContent;
+    const pressure = this.pressure.textContent;
+    const sunriseTime = this.sunriseTime.textContent;
+    const sunsetTime = this.sunsetTime.textContent;
+    const aqi = this.aqi.textContent;
+    const uvIndex = this.uvIndex.textContent;
+    const visibility = this.visibility.textContent;
+    const moonPhase = this.moonPhase.textContent;
+    const forecast = this.forecastContainer.innerHTML;
+    const weatherDataHTML = `
+    <div>City: ${cityName}</div>
+    <div>Date: ${currentDate}</div>
+    <div>Temperature: ${temperature}</div>
+    <div>Feels Like: ${feelsLike}</div>
+    <div>Description: ${weatherDescription}</div>
+    <div>Humidity: ${humidity}</div>
+    <div>Wind Speed: ${windSpeed}</div>
+    <div>Wind Direction: ${windDirection}</div>
+    <div>Pressure: ${pressure}</div>
+    <div>Sunrise: ${sunriseTime}</div>
+    <div>Sunset: ${sunsetTime}</div>
+    <div>AQI: ${aqi}</div>
+    <div>UV Index: ${uvIndex}</div>
+    <div>Visibility: ${visibility}</div>
+    <div>Moon Phase: ${moonPhase}</div>
+    <div><h3>Forecast</h3>${forecast}</div>
+    `;
+    return weatherDataHTML;
   }
 
   animateInitialLoad() {
@@ -101,7 +159,8 @@ class WeatherApp {
       this.temperature,
       this.weatherIcon,
       this.forecastContainer,
-      this.forecastGraph
+      this.forecastGraph,
+      this.lineGraphContainer
     ];
 
     elementsToAnimate.forEach(el => {
@@ -115,48 +174,11 @@ class WeatherApp {
   }
 
   updateUI(currentWeather, forecastData, oneCallData) {
-    this.currentWeatherData = {
-      current: currentWeather,
-      forecast: forecastData,
-      oneCall: oneCallData,
-      timestamp: new Date().toISOString()
-    };
     this.updateCurrentWeather(currentWeather, oneCallData);
     this.updateExtendedForecast(forecastData);
     this.updateBackground(currentWeather.weather[0].main);
     this.updateForecastGraph(currentWeather, forecastData);
-  }
-  exportWeatherData() {
-    if (!this.currentWeatherData) {
-      alert('No weather data to export. Please search for a city first.');
-      return;
-    }
-
-    // Create a JSON string
-    const dataStr = JSON.stringify(this.currentWeatherData, null, 2);
-    
-    // Create a blob from the JSON string
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    
-    // Create a download link
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    
-    // Generate a filename with city name and date
-    const cityName = this.currentWeatherData.current.name || 'weather';
-    const dateStr = new Date().toISOString().split('T')[0];
-    a.download = `${cityName}-weather-${dateStr}.json`;
-    
-    // Trigger the download
-    document.body.appendChild(a);
-    a.click();
-    
-    // Clean up
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
+    this.updateLineGraph(currentWeather, forecastData);
   }
 
   updateCurrentWeather(data, oneCallData) {
@@ -289,79 +311,92 @@ class WeatherApp {
     return icons[weatherCondition] || '<span class="animated-icon">❓</span>';
   }
 
-  updateForecastGraph(currentWeather, forecastData) {
+  updateLineGraph(currentWeather, forecastData) {
+    this.lineGraphSvg.innerHTML = ''; // Clear previous graph
+
+    // Example data (replace with your actual data extraction logic)
     const dailyData = this.groupForecastByDay(forecastData.list).slice(0, 5);
     const currentTemp = currentWeather.main.temp;
-
-    const graphData = [
+    const lineGraphData = [
       Math.round(currentTemp),
       Math.round((dailyData[0].main.temp_max + currentTemp) / 2),
       Math.round((currentTemp + dailyData[0].main.temp_min) / 2),
       Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2),
       Math.round(dailyData[0].main.temp)
     ];
+    const lineGraphLabels = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
+    lineGraphLabels.unshift("Today");
 
-    const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
-    dayNames.unshift("Today")
-
-    const allTemps = [];
-    allTemps.push(currentTemp);
-    dailyData.forEach(day => {
-        allTemps.push(day.main.temp_max);
-        allTemps.push(day.main.temp_min);
-    });
-
-    this.createGraph(graphData, dayNames, allTemps);
+    // Create the line graph
+    this.createLineGraph(lineGraphData, lineGraphLabels);
   }
 
-  createGraph(data, labels, allTemps) {
-    this.forecastGraph.innerHTML = '';
+  createLineGraph(data, labels) {
+    const svg = this.lineGraphSvg;
+    const width = svg.clientWidth;
+    const height = svg.clientHeight;
+    const padding = 50;
+    const maxValue = Math.max(...data);
+    const minValue = Math.min(...data);
+    const valueRange = maxValue - minValue;
+    const numPoints = data.length;
+    const xStep = (width - 2 * padding) / (numPoints - 1);
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '100%');
-    svg.setAttribute('height', '200');
-    svg.setAttribute('viewBox', '0 0 500 200');
+    // Y-axis label
+    const yAxisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    yAxisLabel.setAttribute("class", "axis-label y-axis-label");
+    yAxisLabel.setAttribute("x", -height / 2);
+    yAxisLabel.setAttribute("y", padding / 2);
+    yAxisLabel.textContent = "Temperature (°C)";
+    svg.appendChild(yAxisLabel);
 
-    const maxTemp = Math.max(...allTemps);
-    const minTemp = Math.min(...allTemps);
-    const tempRange = maxTemp - minTemp;
-    const padding = 20;
-    const graphWidth = 500 - 2 * padding;
-    const graphHeight = 200 - 2 * padding;
-    const barWidth = graphWidth / data.length;
+    // X-axis label
+    const xAxisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    xAxisLabel.setAttribute("class", "axis-label x-axis-label");
+    xAxisLabel.setAttribute("x", width / 2);
+    xAxisLabel.setAttribute("y", height - padding / 4);
+    xAxisLabel.textContent = "Days";
+    svg.appendChild(xAxisLabel);
 
-    for (let i = 0; i < data.length; i++) {
-      const barHeight = (data[i] - minTemp) / tempRange * graphHeight;
-      const x = padding + i * barWidth;
-      const y = graphHeight + padding - barHeight;
+    // Create points for the line
+    const points = data.map((value, index) => {
+      const x = padding + index * xStep;
+      const y = height - padding - ((value - minValue) / valueRange) * (height - 2 * padding);
+      return `${x},${y}`;
+    }).join(" ");
 
-      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      rect.setAttribute('x', x);
-      rect.setAttribute('y', y);
-      rect.setAttribute('width', barWidth - 10);
-      rect.setAttribute('height', barHeight);
-      rect.setAttribute('fill', 'lightblue');
-      rect.setAttribute('rx', '5');
-      rect.setAttribute('ry', '5');
+    // Draw the line
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    line.setAttribute("class", "line");
+    line.setAttribute("points", points);
+    svg.appendChild(line);
 
-      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      text.setAttribute('x', x + barWidth / 2 - 5);
-      text.setAttribute('y', y - 5);
-      text.setAttribute('fill', 'white');
-      text.textContent = data[i] + '°C';
+    // Draw dots and labels
+    data.forEach((value, index) => {
+      const x = padding + index * xStep;
+      const y = height - padding - ((value - minValue) / valueRange) * (height - 2 * padding);
 
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', x + barWidth / 2 - 10);
-      label.setAttribute('y', graphHeight + padding + 20);
-      label.setAttribute('fill', 'white');
-      label.textContent = labels[i];
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("class", "dot");
+      dot.setAttribute("cx", x);
+      dot.setAttribute("cy", y);
+      dot.setAttribute("r", 5);
+      svg.appendChild(dot);
 
-      svg.appendChild(rect);
-      svg.appendChild(text);
+      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      label.setAttribute("class", "line-label");
+      label.setAttribute("x", x);
+      label.setAttribute("y", y - 10);
+      label.textContent = `${value}°C`;
       svg.appendChild(label);
-    }
 
-    this.forecastGraph.appendChild(svg);
+      const dayLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      dayLabel.setAttribute("class", "line-label");
+      dayLabel.setAttribute("x", x);
+      dayLabel.setAttribute("y", height - padding + 20);
+      dayLabel.textContent = labels[index];
+      svg.appendChild(dayLabel);
+    });
   }
 }
 
