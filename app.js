@@ -311,116 +311,7 @@ class WeatherApp {
     return icons[weatherCondition] || '<span class="animated-icon">❓</span>';
   }
 
-  updateLineGraph(currentWeather, forecastData) {
-    this.lineGraphSvg.innerHTML = ''; // Clear previous graph
-
-    // Example data (replace with your actual data extraction logic)
-    const dailyData = this.groupForecastByDay(forecastData.list).slice(0, 5);
-    const currentTemp = currentWeather.main.temp;
-    const lineGraphData = [
-      Math.round(currentTemp),
-      Math.round((dailyData[0].main.temp_max + currentTemp) / 2),
-      Math.round((currentTemp + dailyData[0].main.temp_min) / 2),
-      Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2),
-      Math.round(dailyData[0].main.temp)
-    ];
-    const lineGraphLabels = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
-    lineGraphLabels.unshift("Today");
-
-    // Create the line graph
-    this.createLineGraph(lineGraphData, lineGraphLabels);
-  }
-
-  createLineGraph(data, labels) {
-    const svg = this.lineGraphSvg;
-    const width = svg.clientWidth;
-    const height = svg.clientHeight;
-    const padding = 50;
-    const maxValue = Math.max(...data);
-    const minValue = Math.min(...data);
-    const valueRange = maxValue - minValue;
-    const numPoints = data.length;
-    const xStep = (width - 2 * padding) / (numPoints - 1);
-
-    // Y-axis label
-    const yAxisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    yAxisLabel.setAttribute("class", "axis-label y-axis-label");
-    yAxisLabel.setAttribute("x", -height / 2);
-    yAxisLabel.setAttribute("y", padding / 2);
-    yAxisLabel.textContent = "Temperature (°C)";
-    svg.appendChild(yAxisLabel);
-
-    // X-axis label
-    const xAxisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    xAxisLabel.setAttribute("class", "axis-label x-axis-label");
-    xAxisLabel.setAttribute("x", width / 2);
-    xAxisLabel.setAttribute("y", height - padding / 4);
-    xAxisLabel.textContent = "Days";
-    svg.appendChild(xAxisLabel);
-
-    // Create points for the line
-    const points = data.map((value, index) => {
-      const x = padding + index * xStep;
-      const y = height - padding - ((value - minValue) / valueRange) * (height - 2 * padding);
-      return `${x},${y}`;
-    }).join(" ");
-
-    // Draw the line
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-    line.setAttribute("class", "line");
-    line.setAttribute("points", points);
-    svg.appendChild(line);
-
-    // Draw dots and labels
-    data.forEach((value, index) => {
-      const x = padding + index * xStep;
-      const y = height - padding - ((value - minValue) / valueRange) * (height - 2 * padding);
-
-      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      dot.setAttribute("class", "dot");
-      dot.setAttribute("cx", x);
-      dot.setAttribute("cy", y);
-      dot.setAttribute("r", 5);
-      svg.appendChild(dot);
-
-      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      label.setAttribute("class", "line-label");
-      label.setAttribute("x", x);
-      label.setAttribute("y", y - 10);
-      label.textContent = `${value}°C`;
-      svg.appendChild(label);
-
-      const dayLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      dayLabel.setAttribute("class", "line-label");
-      dayLabel.setAttribute("x", x);
-      dayLabel.setAttribute("y", height - padding + 20);
-      dayLabel.textContent = labels[index];
-      svg.appendChild(dayLabel);
-    });
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  new WeatherApp();
-
-  const currentHour = new Date().getHours();
-
-  if (!isNaN(currentHour)) {
-    let sunPositionPercentage = (currentHour / 24) * 100;
-    sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
-    document.documentElement.style.setProperty('--sun-position', `${sunPositionPercentage}%`);
-  }
-
-  const sunElement = document.querySelector('.sun');
-  sunElement.style.animation = 'none';
-
-  const dateTimeElement = document.getElementById('date-time');
-  setInterval(() => {
-    const now = new Date();
-    dateTimeElement.textContent = now.toLocaleString();
-  }, 1000);
-});
-function generateRandomLineGraph() {
+  generateRandomLineGraph() {
     const svg = document.getElementById("line-graph-svg");
     svg.setAttribute("width", "500");
     svg.setAttribute("height", "300");
@@ -429,22 +320,47 @@ function generateRandomLineGraph() {
     const height = 300;
     const numPoints = 10;
     let points = [];
-
+  
     for (let i = 0; i < numPoints; i++) {
         let x = (i / (numPoints - 1)) * width;
         let y = Math.random() * height;
         points.push(`${x},${y}`);
     }
-
+  
     let polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
     polyline.setAttribute("points", points.join(" "));
     polyline.setAttribute("fill", "none");
     polyline.setAttribute("stroke", "blue");
     polyline.setAttribute("stroke-width", "2");
-
+  
     svg.innerHTML = ""; // Clear previous graph
     svg.appendChild(polyline);
+  }
+
+  static initialize() {
+    document.addEventListener('DOMContentLoaded', () => {
+      new WeatherApp();
+
+      const currentHour = new Date().getHours();
+
+      if (!isNaN(currentHour)) {
+        let sunPositionPercentage = (currentHour / 24) * 100;
+        sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
+        document.documentElement.style.setProperty('--sun-position', `${sunPositionPercentage}%`);
+      }
+
+      const sunElement = document.querySelector('.sun');
+      sunElement.style.animation = 'none';
+
+      const dateTimeElement = document.getElementById('date-time');
+      setInterval(() => {
+        const now = new Date();
+        dateTimeElement.textContent = now.toLocaleString();
+      }, 1000);
+    });
+  }
 }
 
-generateRandomLineGraph();
+WeatherApp.initialize();
+
 
