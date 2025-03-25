@@ -67,6 +67,11 @@ class WeatherApp {
       const currentWeatherResponse = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
       );
+
+      if (!currentWeatherResponse.ok) {
+        throw new Error('City not found');
+      }
+
       const currentWeather = await currentWeatherResponse.json();
 
       // Forecast
@@ -94,7 +99,24 @@ class WeatherApp {
       this.animateWeatherUpdate();
     } catch (error) {
       console.error('Error fetching weather data:', error);
-      alert('City not found. Please try again.');
+      // Handle the error gracefully, e.g., display a message in the UI
+      this.cityName.textContent = "City Not Found";
+      this.temperature.textContent = "";
+      this.feelsLike.textContent = "";
+      this.weatherIcon.innerHTML = "";
+      this.weatherDescription.textContent = "";
+      this.humidity.textContent = "";
+      this.windSpeed.textContent = "";
+      this.windDirection.textContent = "";
+      this.pressure.textContent = "";
+      this.sunriseTime.textContent = "";
+      this.sunsetTime.textContent = "";
+      this.aqi.textContent = "";
+      this.uvIndex.textContent = "";
+      this.visibility.textContent = "";
+      this.moonPhase.textContent = "";
+      this.forecastContainer.innerHTML = "";
+      this.forecastGraph.innerHTML = "";
 
       // Remove loading state
       this.weatherCards.forEach(card => card.classList.remove('loading'));
@@ -269,19 +291,15 @@ class WeatherApp {
 
     const graphData = [
       Math.round(currentTemp), // Day 1: Actual temperature
-      Math.round((dailyData[0].main.temp_max + currentTemp) / 2), // Day 2: Avg of max and current
-      Math.round((currentTemp + dailyData[0].main.temp_min) / 2), // Day 3: Avg of current and min
-      Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2), // Day 4: Avg of min and max
-      Math.round(dailyData[0].main.temp) // Day 5: Actual temperature
     ];
-
-    const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
-    dayNames.unshift("Today")
+    
+    const dayNames = ["Today"];
 
     // Extract all temp_max and temp_min values for the graph
-    const allTemps = [];
-    allTemps.push(currentTemp); // Add current temp
+    const allTemps = [currentTemp];
     dailyData.forEach(day => {
+        graphData.push(Math.round((day.main.temp_max + day.main.temp_min) / 2));
+        dayNames.push(this.formatDayName(new Date(day.dt * 1000)));
         allTemps.push(day.main.temp_max);
         allTemps.push(day.main.temp_min);
     });
@@ -324,12 +342,14 @@ class WeatherApp {
       text.setAttribute('x', x + barWidth / 2 - 5);
       text.setAttribute('y', y - 5);
       text.setAttribute('fill', 'white');
+      text.setAttribute('font-size', '12')
       text.textContent = data[i] + '°C';
 
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       label.setAttribute('x', x + barWidth / 2 - 10);
       label.setAttribute('y', graphHeight + padding + 20);
       label.setAttribute('fill', 'white');
+      label.setAttribute('font-size', '12')
       label.textContent = labels[i];
 
       svg.appendChild(rect);
@@ -357,7 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     // Calculate sun position percentage safely
     let sunPositionPercentage = (currentHour / 24) * 100;
-    sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI - (Math.PI / 2)) * 50 + 50;
+    sunPositionPercentage = Math.sin((sunPositionPercentage / 100) * Math.PI) * 100;
+
 
     // Set the CSS variable
     document.documentElement.style.setProperty('--sun-position', `${sunPositionPercentage}%`);
