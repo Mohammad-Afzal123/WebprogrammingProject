@@ -208,12 +208,15 @@ header {
     box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
 }
 
+.search-box input:focus {
+    outline: none; /* Remove default focus outline */
+}
+
 .search-box input:focus + button {
     box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
 }
-
 .search-box input {
-    width: 50%;
+    width:60%;
     padding: 12px;
     border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 8px;
@@ -222,6 +225,20 @@ header {
     color: white;
     transition: all 0.4s ease;
 }
+.search-box input {
+    width: 50%; /* Increased width */
+    padding: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    font-size: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: all 0.4s ease;
+}
+.search-box button{
+    width: 60%;
+}
+
 
 .temperature-section h1 {
     text-align: center;
@@ -309,5 +326,4 @@ header {
     font-size: 1.2em;
     animation: fadeIn 1s ease-in-out;
 }
-
 
