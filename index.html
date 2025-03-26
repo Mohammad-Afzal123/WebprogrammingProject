@@ -5,7 +5,7 @@
     <title>Advanced Weather Forecast Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link href=
@@ -170,12 +170,41 @@
           </svg>
     </header>
     <div class="weather-container">
-        <div id="date-time"></div>
-        <div class="search-box">
-            <input type="text" id="city-input" placeholder="Enter city name">
-            <button id="search-btn">Search</button>
-            <button id="export-btn" class="weather-card">Export as JSON</button>
+        <div id="date-time"></div>        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="city-input" placeholder="Enter city name">
+                <button id="search-btn">Search</button>
+                <button id="export-btn" class="weather-card">Export as JSON</button>
+            </div>
+            <nav>
+                <a href="aboutus.html" class="nav-button">About Us</a>
+            </nav>
         </div>
+        <style>
+            .search-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                max-width: 1000px; 
+                margin: 0 auto;
+                padding: 10px;
+            }
+            .search-box {
+            display: flex;
+            gap: 10px; /* Space between search input and buttons */
+        }
+
+        .nav-button {
+            background-color: #007bff; /* Example blue color */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none; /* Remove underline from link */
+       }
+            </style>
         
         <div class="weather-cards">
             <div class="weather-card location-card">
@@ -311,50 +340,7 @@
                 </div>
                 <div id="extended-forecast-container" class="card-content forecast-container"></div>
                 <div id="line-graph-container">
-                    <svg id="line-graph-svg" width="500" height="300">
-        <script>
-            const data = [
-                { day: "Day 1", temp: Math.random() * 40 },
-                { day: "Day 2", temp: Math.random() * 40 },
-                { day: "Day 3", temp: Math.random() * 40 },
-                { day: "Day 4", temp: Math.random() * 40 },
-                { day: "Day 5", temp: Math.random() * 40 }
-            ];
-
-            const svg = d3.select("#line-graph-svg"),
-                  width = +svg.attr("width"),
-                  height = +svg.attr("height"),
-                  margin = { top: 20, right: 30, bottom: 50, left: 50 };
-
-            const xScale = d3.scalePoint()
-                .domain(data.map(d => d.day))
-                .range([margin.left, width - margin.right]);
-
-            const yScale = d3.scaleLinear()
-                .domain([0, 40])
-                .range([height - margin.bottom, margin.top]);
-
-            const line = d3.line()
-                .x(d => xScale(d.day))
-                .y(d => yScale(d.temp))
-                .curve(d3.curveMonotoneX);
-
-            svg.append("g")
-                .attr("transform", `translate(0,${height - margin.bottom})`)
-                .call(d3.axisBottom(xScale));
-
-            svg.append("g")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(yScale));
-
-            svg.append("path")
-                .datum(data)
-                .attr("fill", "none")
-                .attr("stroke", "blue")
-                .attr("stroke-width", 2)
-                .attr("d", line);
-        </script>
-    </svg>
+                    <svg id="line-graph-svg"></svg>
                 </div>
             </div>
         </div>
