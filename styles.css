@@ -6,7 +6,12 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
-
+#output {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: blue;
+        }
 body {
     margin: 0;
     background: linear-gradient(135deg, #283c8e, #45a247);
