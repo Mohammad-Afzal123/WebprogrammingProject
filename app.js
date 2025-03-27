@@ -283,64 +283,84 @@ class WeatherApp {
         return icons[weatherCondition] || '<span class="animated-icon">❓</span>';
     }
 
-    generateRandomGraph() {
-    const graphData = Array.from({ length: 5 }, () => Math.round(Math.random() * (35 - 10) + 10));
-    const dayNames = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'];
-    this.createGraph(graphData, dayNames, graphData);
-}
+    updateForecastGraph(currentWeather, forecastData) {
+        const dailyData = this.groupForecastByDay(forecastData.list).slice(0, 5);
+        const currentTemp = currentWeather.main.temp;
 
-createGraph(data, labels, allTemps) {
-    this.forecastGraph.innerHTML = '';
+        const graphData = [
+            Math.round(currentTemp),
+            Math.round((dailyData[0].main.temp_max + currentTemp) / 2),
+            Math.round((currentTemp + dailyData[0].main.temp_min) / 2),
+            Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2),
+            Math.round(dailyData[0].main.temp)
+        ];
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '100%');
-    svg.setAttribute('height', '200');
-    svg.setAttribute('viewBox', '0 0 500 200');
+        const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
+        dayNames.unshift("Today");
 
-    const maxTemp = Math.max(...allTemps);
-    const minTemp = Math.min(...allTemps);
-    const tempRange = maxTemp - minTemp;
-    const padding = 20;
-    const graphWidth = 500 - 2 * padding;
-    const graphHeight = 200 - 2 * padding;
-    const barWidth = graphWidth / data.length;
+        const allTemps = [];
+        allTemps.push(currentTemp);
+        dailyData.forEach(day => {
+            allTemps.push(day.main.temp_max);
+            allTemps.push(day.main.temp_min);
+        });
 
-    for (let i = 0; i < data.length; i++) {
-        const barHeight = (data[i] - minTemp) / tempRange * graphHeight;
-        const x = padding + i * barWidth;
-        const y = graphHeight + padding - barHeight;
-
-        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        rect.setAttribute('x', x);
-        rect.setAttribute('y', y);
-        rect.setAttribute('width', barWidth - 10);
-        rect.setAttribute('height', barHeight);
-        rect.setAttribute('fill', 'rgba(255, 255, 255, 0.7)');
-        rect.setAttribute('rx', '5');
-        rect.setAttribute('ry', '5');
-
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', x + barWidth / 2 - 5);
-        text.setAttribute('y', y - 5);
-        text.setAttribute('fill', 'white');
-        text.setAttribute('font-size', '12');
-        text.setAttribute('text-anchor', 'middle');
-        text.textContent = data[i] + '°C';
-
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', x + barWidth / 2);
-        label.setAttribute('y', graphHeight + padding + 20);
-        label.setAttribute('fill', 'white');
-        label.setAttribute('font-size', '12');
-        label.setAttribute('text-anchor', 'middle');
-        label.textContent = labels[i];
-
-        svg.appendChild(rect);
-        svg.appendChild(text);
-        svg.appendChild(label);
+        this.createGraph(graphData, dayNames, allTemps);
     }
 
-    this.forecastGraph.appendChild(svg);
+    createGraph(data, labels, allTemps) {
+        this.forecastGraph.innerHTML = '';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '200');
+        svg.setAttribute('viewBox', '0 0 500 200');
+
+        const maxTemp = Math.max(...allTemps);
+        const minTemp = Math.min(...allTemps);
+        const tempRange = maxTemp - minTemp;
+        const padding = 20;
+        const graphWidth = 500 - 2 * padding;
+        const graphHeight = 200 - 2 * padding;
+        const barWidth = graphWidth / data.length;
+
+        for (let i = 0; i < data.length; i++) {
+            const barHeight = (data[i] - minTemp) / tempRange * graphHeight;
+            const x = padding + i * barWidth;
+            const y = graphHeight + padding - barHeight;
+
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', barWidth - 10);
+            rect.setAttribute('height', barHeight);
+            rect.setAttribute('fill', 'rgba(255, 255, 255, 0.7)');
+            rect.setAttribute('rx', '5');
+            rect.setAttribute('ry', '5');
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x + barWidth / 2 - 5);
+            text.setAttribute('y', y - 5);
+            text.setAttribute('fill', 'white');
+            text.setAttribute('font-size', '12');
+            text.setAttribute('text-anchor', 'middle');
+            text.textContent = data[i] + '°C';
+
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', x + barWidth / 2);
+            label.setAttribute('y', graphHeight + padding + 20);
+            label.setAttribute('fill', 'white');
+            label.setAttribute('font-size', '12');
+            label.setAttribute('text-anchor', 'middle');
+            label.textContent = labels[i];
+
+            svg.appendChild(rect);
+            svg.appendChild(text);
+            svg.appendChild(label);
+        }
+
+        this.forecastGraph.appendChild(svg);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
