@@ -150,7 +150,7 @@ class WeatherApp {
         this.updateCurrentWeather(currentWeather, oneCallData);
         this.updateExtendedForecast(currentWeather);
         this.updateBackground(currentWeather.weather[0].main);
-        this.updateForecastGraph(currentWeather, forecastData);
+        this.updateForecastGraph(currentWeather);
     }
 
     updateCurrentWeather(data, oneCallData) {
