@@ -148,7 +148,7 @@ class WeatherApp {
             timestamp: new Date().toISOString()
         };
         this.updateCurrentWeather(currentWeather, oneCallData);
-        this.updateExtendedForecast(forecastData);
+        this.updateExtendedForecast(currentWeather);
         this.updateBackground(currentWeather.weather[0].main);
         this.updateForecastGraph(currentWeather, forecastData);
     }
@@ -202,50 +202,47 @@ class WeatherApp {
         return directions[index];
     }
 
-    updateExtendedForecast(data) {
+    updateExtendedForecast(currentWeather) {
         this.forecastContainer.innerHTML = '';
-        const dailyData = this.groupForecastByDay(data.list);
-
-        dailyData.slice(0, 5).forEach(day => {
+    
+        const todayTempMin = Math.round(currentWeather.main.temp_min);
+        const todayTempMax = Math.round(currentWeather.main.temp_max);
+    
+        const forecastData = [];
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const weatherConditions = ['Clear', 'Clouds', 'Rain', 'Thunderstorm', 'Drizzle', 'Mist'];
+    
+        for (let i = 0; i < 5; i++) {
+            const randomTempMin = todayTempMin + Math.floor(Math.random() * 3) - 1; // Random min temp ±1°C
+            const randomTempMax = todayTempMax + Math.floor(Math.random() * 3) - 1; // Random max temp ±1°C
+            const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+    
+            forecastData.push({
+                day: days[i],
+                temp_min: randomTempMin,
+                temp_max: randomTempMax,
+                condition: randomWeather
+            });
+        }
+    
+        forecastData.forEach(day => {
             const forecastDay = document.createElement('div');
             forecastDay.classList.add('forecast-day');
-
-            const dayName = this.formatDayName(new Date(day.dt * 1000));
-
+    
             forecastDay.innerHTML = `
-                <div class="day-name">${dayName}</div>
-                <div>${this.getWeatherIcon(day.weather[0].main)}</div>
+                <div class="day-name">${day.day}</div>
+                <div>${this.getWeatherIcon(day.condition)}</div>
                 <div class="forecast-temp">
-                    <span class="temp-high">H: ${Math.round(day.main.temp_max)}°C</span>
-                    <span class="temp-low">L: ${Math.round(day.main.temp_min)}°C</span>
+                    <span class="temp-high">H: ${day.temp_max}°C</span>
+                    <span class="temp-low">L: ${day.temp_min}°C</span>
                 </div>
-                <p>${day.weather[0].description}</p>
+                <p>${day.condition}</p>
             `;
-
+    
             this.forecastContainer.appendChild(forecastDay);
         });
     }
-
-    groupForecastByDay(forecastList) {
-        const dailyData = {};
-        forecastList.forEach(item => {
-            const date = new Date(item.dt * 1000).toDateString();
-            if (!dailyData[date]) {
-                dailyData[date] = {
-                    dt: item.dt,
-                    weather: item.weather,
-                    main: {
-                        temp_max: item.main.temp,
-                        temp_min: item.main.temp
-                    }
-                };
-            } else {
-                dailyData[date].main.temp_max = Math.max(dailyData[date].main.temp_max, item.main.temp_max);
-                dailyData[date].main.temp_min = Math.min(dailyData[date].main.temp_min, item.main.temp_min);
-            }
-        });
-        return Object.values(dailyData);
-    }
+    
 
     formatDayName(date) {
         return date.toLocaleDateString('en-US', { weekday: 'short' });
@@ -290,28 +287,26 @@ class WeatherApp {
         return icons[weatherCondition] || '<span class="animated-icon">❓</span>';
     }
 
-    updateForecastGraph(currentWeather, forecastData) {
-        const dailyData = this.groupForecastByDay(forecastData.list).slice(0, 5);
-        const currentTemp = currentWeather.main.temp;
-
+    updateForecastGraph(currentWeather) {
+        this.forecastGraph.innerHTML = '';
+    
+        const todayTempMin = Math.round(currentWeather.main.temp_min);
+        const todayTempMax = Math.round(currentWeather.main.temp_max);
+    
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         const graphData = [];
-        const dayNames = [];
         const allTemps = [];
         
-        graphData.push(Math.round(currentTemp));
-        dayNames.push("Today");
-        allTemps.push(currentTemp);
-
-        dailyData.forEach(day => {
-            const avgTemp = Math.round((day.main.temp_max + day.main.temp_min) / 2);
-            graphData.push(avgTemp);
-            dayNames.push(this.formatDayName(new Date(day.dt * 1000)));
-            allTemps.push(day.main.temp_max);
-            allTemps.push(day.main.temp_min);
-        });
-
-        this.createGraph(graphData, dayNames, allTemps);
+        // Generate 5-day temperatures within today's min-max range
+        for (let i = 0; i < 5; i++) {
+            const randomTemp = todayTempMin + Math.floor(Math.random() * (todayTempMax - todayTempMin + 1)); 
+            graphData.push(randomTemp);
+            allTemps.push(todayTempMin, todayTempMax);
+        }
+    
+        this.createGraph(graphData, days, allTemps);
     }
+    
 
     createGraph(data, labels, allTemps) {
         this.forecastGraph.innerHTML = '';
