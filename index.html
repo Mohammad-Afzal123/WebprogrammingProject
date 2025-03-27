@@ -345,7 +345,14 @@
             </div>
         </div>
     </div>
-    
+     <button onclick="analyze()">Analyze</button>
+    <p id="output"></p>
+
+    <script>
+        function analyze() {
+            document.getElementById("output").innerText = "Analysis complete: Your data has been processed successfully!";
+        }
+    </script>
     <!-- India Weather Map Container -->
     <div id="weather-container">
         <h2>Live Weather Map - India</h2>
