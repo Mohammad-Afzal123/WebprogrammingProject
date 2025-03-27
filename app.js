@@ -57,7 +57,7 @@ class WeatherApp {
     async fetchWeatherData() {
         const city = this.cityInput.value;
         if (!city) return;
-        
+
         this.weatherCards.forEach(card => card.classList.add('loading'));
 
         try {
@@ -102,13 +102,13 @@ class WeatherApp {
             const dataStr = JSON.stringify(this.currentWeatherData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = `${this.currentWeatherData.current.name || 'weather'}-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
-            
+
             setTimeout(() => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
@@ -231,10 +231,17 @@ class WeatherApp {
         forecastList.forEach(item => {
             const date = new Date(item.dt * 1000).toDateString();
             if (!dailyData[date]) {
-                dailyData[date] = item;
+                dailyData[date] = {
+                    dt: item.dt,
+                    weather: item.weather,
+                    main: {
+                        temp_max: item.main.temp,
+                        temp_min: item.main.temp
+                    }
+                };
             } else {
-                dailyData[date].main.temp_max = Math.max(dailyData[date].main.temp_max || item.main.temp, item.main.temp_max || item.main.temp);
-                dailyData[date].main.temp_min = Math.min(dailyData[date].main.temp_min || item.main.temp, item.main.temp_min || item.main.temp);
+                dailyData[date].main.temp_max = Math.max(dailyData[date].main.temp_max, item.main.temp_max);
+                dailyData[date].main.temp_min = Math.min(dailyData[date].main.temp_min, item.main.temp_min);
             }
         });
         return Object.values(dailyData);
@@ -287,20 +294,18 @@ class WeatherApp {
         const dailyData = this.groupForecastByDay(forecastData.list).slice(0, 5);
         const currentTemp = currentWeather.main.temp;
 
-        const graphData = [
-            Math.round(currentTemp),
-            Math.round((dailyData[0].main.temp_max + currentTemp) / 2),
-            Math.round((currentTemp + dailyData[0].main.temp_min) / 2),
-            Math.round((dailyData[0].main.temp_min + dailyData[0].main.temp_max) / 2),
-            Math.round(dailyData[0].main.temp)
-        ];
-
-        const dayNames = dailyData.map(day => this.formatDayName(new Date(day.dt * 1000)));
-        dayNames.unshift("Today");
-
+        const graphData = [];
+        const dayNames = [];
         const allTemps = [];
+        
+        graphData.push(Math.round(currentTemp));
+        dayNames.push("Today");
         allTemps.push(currentTemp);
+
         dailyData.forEach(day => {
+            const avgTemp = Math.round((day.main.temp_max + day.main.temp_min) / 2);
+            graphData.push(avgTemp);
+            dayNames.push(this.formatDayName(new Date(day.dt * 1000)));
             allTemps.push(day.main.temp_max);
             allTemps.push(day.main.temp_min);
         });
@@ -339,7 +344,7 @@ class WeatherApp {
             rect.setAttribute('ry', '5');
 
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', x + barWidth / 2 - 5);
+            text.setAttribute('x', x + barWidth / 2);
             text.setAttribute('y', y - 5);
             text.setAttribute('fill', 'white');
             text.setAttribute('font-size', '12');
